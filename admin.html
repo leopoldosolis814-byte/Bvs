@@ -7,24 +7,26 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         body { font-family: 'Inter', sans-serif; background: #0A0A0A; }
         .logo-preview { width: 60px; height: 60px; object-fit: contain; border-radius: 12px; background: #1a1a1a; padding: 4px; }
     </style>
 </head>
 <body class="p-4 md:p-6">
+
     <div id="loginPanel" class="max-w-md mx-auto mt-20 bg-white rounded-2xl p-8 shadow-xl">
         <h2 class="text-2xl font-bold mb-4">Acceso al Panel</h2>
-        <input type="password" id="passwordInput" placeholder="Contraseña" class="w-full border rounded-xl px-4 py-2 mb-4">
+        <input type="password" id="passwordInput" placeholder="Contraseña" class="w-full border rounded-xl px-4 py-2 mb-4" onkeydown="if(event.key==='Enter')verificarPassword()">
         <button onclick="verificarPassword()" class="w-full bg-blue-600 text-white py-2 rounded-xl hover:bg-blue-700 transition">Entrar</button>
     </div>
-    
+
     <div id="adminPanel" style="display:none;" class="max-w-6xl mx-auto bg-white rounded-2xl p-4 md:p-6">
         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-6">
             <h2 class="text-lg md:text-xl font-bold"><i class="fas fa-lock mr-2"></i> Panel de Administración</h2>
             <button onclick="exportarProyectos()" class="text-xs md:text-sm border border-gray-300 px-3 py-1.5 rounded-xl hover:bg-gray-50 transition"><i class="fas fa-download mr-1"></i> Exportar datos</button>
         </div>
-        
+
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
             <input type="hidden" id="projId">
             <input type="text" id="projNombre" placeholder="Nombre del proyecto" class="border rounded-xl px-3 py-2 text-sm">
@@ -50,11 +52,11 @@
                 <option value="Project Completed">Project Completed</option>
             </select>
         </div>
-        
+
         <div class="mb-4">
             <label class="block text-sm font-medium mb-2">Logo del proyecto (imagen)</label>
             <div class="flex flex-col sm:flex-row gap-2 items-start sm:items-center">
-                <input type="file" id="logoFileInput" accept="*/*" class="flex-1 text-sm border border-gray-300 rounded-xl px-3 py-2 bg-white">
+                <input type="file" id="logoFileInput" accept="image/*" class="flex-1 text-sm border border-gray-300 rounded-xl px-3 py-2 bg-white">
                 <button type="button" onclick="cargarLogo()" class="bg-blue-600 text-white px-4 py-2 rounded-xl text-sm whitespace-nowrap"><i class="fas fa-upload mr-1"></i> Subir logo</button>
             </div>
             <div id="logoPreview" class="mt-2 hidden">
@@ -64,7 +66,7 @@
             <input type="hidden" id="projLogoData">
             <p class="text-xs text-gray-400 mt-1">Selecciona una imagen (PNG, JPG, etc.)</p>
         </div>
-        
+
         <div class="mb-4">
             <label class="block text-sm font-medium mb-2">Subir archivo HTML</label>
             <div class="flex flex-col sm:flex-row gap-2">
@@ -73,28 +75,32 @@
             </div>
             <p class="text-xs text-gray-400 mt-1">Selecciona un archivo .html desde tu dispositivo.</p>
         </div>
-        
+
         <div class="mb-4">
             <label class="block text-sm font-medium mb-2">Código HTML del proyecto</label>
             <textarea id="projHtml" rows="6" placeholder="O pega el código HTML directamente aquí..." class="w-full border rounded-xl px-3 py-2 text-sm font-mono"></textarea>
         </div>
-        
+
         <div class="flex items-center gap-4 mb-6">
-            <label class="flex items-center gap-2 text-sm"><input type="checkbox" id="projActivo"> Activo en landing</label>
+            <label class="flex items-center gap-2 text-sm"><input type="checkbox" id="projActivo" checked> Activo en landing</label>
         </div>
-        
+
         <div class="flex flex-col sm:flex-row gap-3 mb-8">
             <button onclick="guardarProyecto()" class="bg-blue-600 text-white px-5 py-2 rounded-xl text-sm font-semibold"><i class="fas fa-save mr-1"></i> Guardar proyecto</button>
             <button onclick="limpiarFormulario()" class="border border-gray-300 px-5 py-2 rounded-xl text-sm"><i class="fas fa-eraser mr-1"></i> Cancelar</button>
         </div>
-        
+
         <h3 class="font-semibold mb-3 text-base">Proyectos existentes</h3>
         <div id="adminLista" class="space-y-2 max-h-80 overflow-y-auto"></div>
     </div>
-    
+
     <script>
+        const SUPABASE_URL = 'https://hniumqxaqfjvumimwtyp.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhuaXVtcXhhcWZqdnVtaW13dHlwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAwMTc2MjAsImV4cCI6MjA5NTU5MzYyMH0.JC7Hscdy7lpiMIaDD02vteh5aw9GDdEPCzmzBvUMs9Q';
+        const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
         let proyectos = [];
-        
+
         function verificarPassword() {
             const pass = document.getElementById('passwordInput').value;
             if (pass === 'builder2026') {
@@ -105,27 +111,25 @@
                 alert('Contraseña incorrecta');
             }
         }
-        
-        function guardarEnLocalStorage() { localStorage.setItem('builder_ventures', JSON.stringify(proyectos)); }
-        
-        function cargarProyectos() {
-            const stored = localStorage.getItem('builder_ventures');
-            if (stored) proyectos = JSON.parse(stored);
-            else proyectos = [];
+
+        async function cargarProyectos() {
+            const { data, error } = await sb.from('proyectos').select('*').order('created_at', { ascending: false });
+            if (error) { alert('Error al cargar: ' + error.message); return; }
+            proyectos = data || [];
             renderizarAdminLista();
         }
-        
+
         function renderizarAdminLista() {
             const container = document.getElementById('adminLista');
             if (!container) return;
             if (proyectos.length === 0) {
-                container.innerHTML = '<div class="text-center py-4 text-gray-500 text-sm">No hay proyectos creados.</div>';
+                container.innerHTML = '<div class="text-center py-4 text-gray-500 text-sm">No hay proyectos creados. Agrega tu primer proyecto usando el formulario de arriba.</div>';
                 return;
             }
             container.innerHTML = proyectos.map(proj => `
                 <div class="flex flex-wrap justify-between items-center bg-gray-50 p-3 rounded-xl border border-gray-200 gap-2">
                     <div class="flex items-center gap-3">
-                        ${proj.logoData && proj.logoData !== '' ? `<img src="${proj.logoData}" class="w-10 h-10 object-contain rounded-lg">` : `<div class="w-10 h-10 rounded-lg bg-gray-200 flex items-center justify-center text-sm">${proj.icono || 'DOC'}</div>`}
+                        ${proj.logo_data && proj.logo_data !== '' ? `<img src="${proj.logo_data}" class="w-10 h-10 object-contain rounded-lg">` : `<div class="w-10 h-10 rounded-lg bg-gray-200 flex items-center justify-center text-sm">DOC</div>`}
                         <div>
                             <p class="font-medium text-sm">${escapeHtml(proj.nombre)}</p>
                             <p class="text-xs text-gray-500">${escapeHtml(proj.estado)} · ${proj.activo ? 'Activo' : 'Inactivo'}</p>
@@ -133,85 +137,128 @@
                     </div>
                     <div class="flex gap-2">
                         <button onclick="editarProyecto(${proj.id})" class="text-sm px-2 py-1 rounded hover:bg-gray-200"><i class="fas fa-pen"></i></button>
-                        <button onclick="eliminarProyecto(${proj.id})" class="text-sm px-2 py-1 rounded hover:bg-gray-200"><i class="fas fa-trash"></i></button>
+                        <button onclick="eliminarProyecto(${proj.id})" class="text-sm px-2 py-1 rounded hover:bg-gray-200 text-red-500"><i class="fas fa-trash"></i></button>
                     </div>
                 </div>
             `).join('');
         }
-        
-        function guardarProyecto() {
+
+        async function guardarProyecto() {
             const id = document.getElementById('projId').value;
             const nombre = document.getElementById('projNombre').value.trim();
             const descripcion = document.getElementById('projDescripcion').value.trim();
             const estado = document.getElementById('projEstado').value;
-            const nombreEn = document.getElementById('projNombreEn').value.trim();
-            const descripcionEn = document.getElementById('projDescripcionEn').value.trim();
-            const estadoEn = document.getElementById('projEstadoEn').value;
-            const icono = 'DOC';
+            const nombre_en = document.getElementById('projNombreEn').value.trim();
+            const descripcion_en = document.getElementById('projDescripcionEn').value.trim();
+            const estado_en = document.getElementById('projEstadoEn').value;
             const activo = document.getElementById('projActivo').checked;
-            const logoData = document.getElementById('projLogoData')?.value || '';
-            let htmlContent = document.getElementById('projHtml').value.trim();
-            if (!htmlContent) htmlContent = `<html><body style="background:#0A0A0A;display:flex;align-items:center;justify-content:center;height:100vh;color:white;font-family:Inter;"><div><h2>${nombre}</h2><p>Vista previa del proyecto</p></div></body></html>`;
-            if (!nombre) { alert("El nombre es obligatorio"); return; }
-            if (id) { const idx = proyectos.findIndex(p => p.id == id); if (idx !== -1) proyectos[idx] = { ...proyectos[idx], nombre, descripcion, estado, nombreEn, descripcionEn, estadoEn, icono, activo, logoData, htmlContent }; }
-            else proyectos.push({ id: Date.now(), nombre, descripcion, estado, nombreEn, descripcionEn, estadoEn, icono, activo, logoData, htmlContent });
-            guardarEnLocalStorage(); renderizarAdminLista(); limpiarFormulario(); alert("Proyecto guardado");
+            const logo_data = document.getElementById('projLogoData')?.value || '';
+            let html_content = document.getElementById('projHtml').value.trim();
+
+            if (!nombre) { alert('El nombre es obligatorio'); return; }
+            if (!html_content) html_content = `<html><body style="background:#0A0A0A;display:flex;align-items:center;justify-content:center;height:100vh;color:white;font-family:Inter;"><div><h2>${nombre}</h2><p>Vista previa del proyecto</p></div></body></html>`;
+
+            const payload = { nombre, descripcion, estado, nombre_en, descripcion_en, estado_en, activo, logo_data, html_content, updated_at: new Date().toISOString() };
+
+            let error;
+            if (id) {
+                ({ error } = await sb.from('proyectos').update(payload).eq('id', id));
+            } else {
+                ({ error } = await sb.from('proyectos').insert(payload));
+            }
+
+            if (error) { alert('Error al guardar: ' + error.message); return; }
+            alert('Proyecto guardado ✅');
+            limpiarFormulario();
+            cargarProyectos();
         }
-        
+
         function editarProyecto(id) {
             const proj = proyectos.find(p => p.id == id);
             if (proj) {
                 document.getElementById('projId').value = proj.id;
                 document.getElementById('projNombre').value = proj.nombre;
-                document.getElementById('projDescripcion').value = proj.descripcion;
+                document.getElementById('projDescripcion').value = proj.descripcion || '';
                 document.getElementById('projEstado').value = proj.estado;
-                document.getElementById('projNombreEn').value = proj.nombreEn || '';
-                document.getElementById('projDescripcionEn').value = proj.descripcionEn || '';
-                document.getElementById('projEstadoEn').value = proj.estadoEn || 'Pre Seed';
+                document.getElementById('projNombreEn').value = proj.nombre_en || '';
+                document.getElementById('projDescripcionEn').value = proj.descripcion_en || '';
+                document.getElementById('projEstadoEn').value = proj.estado_en || 'Pre Seed';
                 document.getElementById('projActivo').checked = proj.activo;
-                document.getElementById('projHtml').value = proj.htmlContent;
-                if (proj.logoData && proj.logoData !== '') {
-                    document.getElementById('projLogoData').value = proj.logoData;
-                    document.getElementById('logoPreviewImg').src = proj.logoData;
+                document.getElementById('projHtml').value = proj.html_content || '';
+                if (proj.logo_data) {
+                    document.getElementById('projLogoData').value = proj.logo_data;
+                    document.getElementById('logoPreviewImg').src = proj.logo_data;
                     document.getElementById('logoPreview').classList.remove('hidden');
                 } else {
                     document.getElementById('logoPreview').classList.add('hidden');
                 }
+                window.scrollTo({ top: 0, behavior: 'smooth' });
             }
         }
-        
-        function eliminarProyecto(id) { if (confirm("¿Eliminar?")) { proyectos = proyectos.filter(p => p.id != id); guardarEnLocalStorage(); renderizarAdminLista(); alert("Proyecto eliminado"); } }
-        
-        function limpiarFormulario() { 
-            document.getElementById('projId').value = ''; document.getElementById('projNombre').value = ''; document.getElementById('projDescripcion').value = ''; document.getElementById('projEstado').value = 'Pre Seed'; document.getElementById('projNombreEn').value = ''; document.getElementById('projDescripcionEn').value = ''; document.getElementById('projEstadoEn').value = 'Pre Seed'; document.getElementById('projActivo').checked = true; document.getElementById('projHtml').value = ''; document.getElementById('projLogoData').value = ''; document.getElementById('logoPreview').classList.add('hidden'); document.getElementById('logoPreviewImg').src = ''; document.getElementById('logoFileInput').value = ''; document.getElementById('htmlFileInput').value = '';
+
+        async function eliminarProyecto(id) {
+            if (!confirm('¿Eliminar este proyecto?')) return;
+            const { error } = await sb.from('proyectos').delete().eq('id', id);
+            if (error) { alert('Error al eliminar: ' + error.message); return; }
+            alert('Proyecto eliminado');
+            cargarProyectos();
         }
-        
+
+        function limpiarFormulario() {
+            document.getElementById('projId').value = '';
+            document.getElementById('projNombre').value = '';
+            document.getElementById('projDescripcion').value = '';
+            document.getElementById('projEstado').value = 'Pre Seed';
+            document.getElementById('projNombreEn').value = '';
+            document.getElementById('projDescripcionEn').value = '';
+            document.getElementById('projEstadoEn').value = 'Pre Seed';
+            document.getElementById('projActivo').checked = true;
+            document.getElementById('projHtml').value = '';
+            document.getElementById('projLogoData').value = '';
+            document.getElementById('logoPreview').classList.add('hidden');
+            document.getElementById('logoPreviewImg').src = '';
+            document.getElementById('logoFileInput').value = '';
+            document.getElementById('htmlFileInput').value = '';
+        }
+
         function cargarLogo() {
             const file = document.getElementById('logoFileInput').files[0];
-            if (!file) { alert("Selecciona una imagen"); return; }
-            if (!file.type.startsWith('image/')) { alert("Solo imágenes"); return; }
+            if (!file) { alert('Selecciona una imagen'); return; }
+            if (!file.type.startsWith('image/')) { alert('Solo imágenes'); return; }
             const reader = new FileReader();
             reader.onload = function(e) {
                 document.getElementById('projLogoData').value = e.target.result;
                 document.getElementById('logoPreviewImg').src = e.target.result;
                 document.getElementById('logoPreview').classList.remove('hidden');
-                alert("Logo cargado");
+                alert('Logo cargado ✅');
             };
             reader.readAsDataURL(file);
         }
-        
+
         function cargarArchivoHTML() {
             const file = document.getElementById('htmlFileInput').files[0];
-            if (!file) { alert("Selecciona un archivo HTML"); return; }
-            if (!file.name.endsWith('.html')) { alert("Solo archivos .html"); return; }
+            if (!file) { alert('Selecciona un archivo HTML'); return; }
+            if (!file.name.endsWith('.html')) { alert('Solo archivos .html'); return; }
             const reader = new FileReader();
-            reader.onload = function(e) { document.getElementById('projHtml').value = e.target.result; alert("HTML cargado"); };
+            reader.onload = function(e) { document.getElementById('projHtml').value = e.target.result; alert('HTML cargado ✅'); };
             reader.readAsText(file, 'UTF-8');
         }
-        
-        function exportarProyectos() { const dataStr = JSON.stringify(proyectos, null, 2); const blob = new Blob([dataStr], {type: "application/json"}); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = `builder_backup_${new Date().toISOString().slice(0,19)}.json`; a.click(); URL.revokeObjectURL(url); alert("Backup exportado"); }
-        
-        function escapeHtml(str) { if (!str) return ''; return str.replace(/[&<>]/g, m => m === '&' ? '&amp;' : m === '<' ? '&lt;' : '&gt;'); }
+
+        async function exportarProyectos() {
+            const dataStr = JSON.stringify(proyectos, null, 2);
+            const blob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `builder_backup_${new Date().toISOString().slice(0,19)}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function escapeHtml(str) {
+            if (!str) return '';
+            return str.replace(/[&<>]/g, m => m === '&' ? '&amp;' : m === '<' ? '&lt;' : '&gt;');
+        }
     </script>
 </body>
-                                                                                                                                             </html>
+</html>
