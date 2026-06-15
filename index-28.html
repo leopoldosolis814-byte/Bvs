@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>BUILDER VENTURE STUDIO | Constructores de Productos Digitales</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        :root { --accent:#0071E3; --bg:#fff; --bg2:#F5F5F7; --text:#1D1D1F; --text2:#6E6E73; --card:#fff; --border:rgba(0,0,0,0.08); --nav:rgba(255,255,255,0.85); --nav-b:#eee; }
+        body.dark { --bg:#0A0A0A; --bg2:#1a1a1a; --text:#f5f5f7; --text2:#a1a1a6; --card:#1c1c1e; --border:rgba(255,255,255,0.1); --nav:rgba(10,10,10,0.9); --nav-b:#2a2a2a; }
+        *{margin:0;padding:0;box-sizing:border-box;}
+        body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);overflow-x:hidden;transition:background .3s,color .3s;}
+        .glass{background:rgba(255,255,255,0.15);backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,0.25);}
+        .btn-primary{background:var(--accent);color:white;transition:all .3s;}
+        .btn-primary:hover{background:#0077ED;}
+
+        /* NAV */
+        nav{position:fixed;top:0;width:100%;z-index:100;background:var(--nav);backdrop-filter:blur(16px);border-bottom:1px solid var(--nav-b);padding:0.875rem 1.5rem;transition:background .3s,border-color .3s;}
+        .nav-inner{max-width:1440px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;gap:0.75rem;}
+        .nav-logo{display:flex;align-items:center;gap:0.5rem;}
+        .nav-logo span{font-weight:600;font-size:0.9rem;color:var(--text);}
+        .nav-actions{display:flex;align-items:center;gap:0.5rem;}
+        .icon-btn{background:none;border:none;cursor:pointer;padding:6px;color:var(--text);font-size:1rem;}
+        .lang-btn{font-size:0.7rem;font-weight:700;padding:0.2rem 0.5rem;border-radius:100px;border:1px solid var(--nav-b);background:none;color:var(--text);cursor:pointer;transition:all .2s;}
+        .lang-btn.active{background:var(--accent);color:white;border-color:var(--accent);}
+
+        /* MOBILE MENU */
+        .nav-menu{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.96);z-index:200;flex-direction:column;align-items:center;justify-content:center;gap:2rem;}
+        .nav-menu.open{display:flex;}
+        .nav-menu a{color:white;font-size:1.5rem;font-weight:600;text-decoration:none;}
+
+        /* CARDS */
+        .project-card{background:var(--card);border:1px solid var(--border);border-radius:1.5rem;transition:all .3s;cursor:pointer;overflow:hidden;}
+        .project-card:hover{transform:translateY(-6px);border-color:var(--accent);box-shadow:0 16px 32px rgba(0,0,0,0.12);}
+        .preview-container{position:relative;width:100%;padding-bottom:56.25%;overflow:hidden;background:#e5e7eb;border-radius:1rem 1rem 0 0;}
+        body.dark .preview-container{background:#2a2a2a;}
+        .preview-container img{position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;transition:transform .3s;}
+        .preview-container .no-img{position:absolute;top:0;left:0;width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:#9ca3af;font-size:.875rem;}
+        .project-card:hover .preview-container img{transform:scale(1.05);}
+        .play-btn{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:48px;height:48px;background:var(--accent);border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 12px rgba(0,0,0,0.3);}
+        .play-btn i{color:white;font-size:1rem;margin-left:3px;}
+        .card-body{padding:1rem 1.25rem 1.25rem;}
+        .status-badge{font-size:.7rem;font-weight:500;padding:.2rem .7rem;border-radius:100px;background:var(--bg2);color:var(--text2);display:inline-block;}
+
+        /* MODAL */
+        .modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.85);backdrop-filter:blur(12px);z-index:1000;align-items:center;justify-content:center;}
+        .modal.active{display:flex;}
+        .modal-box{width:90%;max-width:1300px;height:85vh;background:white;border-radius:28px;overflow:hidden;}
+        .modal-box iframe{width:100%;height:calc(100% - 56px);border:none;}
+        .modal-header{display:flex;justify-content:space-between;align-items:center;padding:0 1rem;height:56px;border-bottom:1px solid #eee;}
+
+        /* MISC */
+        .reveal{opacity:0;transform:translateY(20px);transition:opacity .6s ease,transform .6s ease;}
+        .reveal.visible{opacity:1;transform:translateY(0);}
+        .marquee{overflow:hidden;}
+        .marquee-content{display:flex;animation:marquee 30s linear infinite;gap:3rem;}
+        @keyframes marquee{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+        .divider{height:1px;background:linear-gradient(90deg,transparent,var(--border),transparent);}
+        section{transition:background .3s;}
+    </style>
+</head>
+<body>
+
+<nav>
+    <div class="nav-inner">
+        <div class="nav-logo">
+            <div style="width:32px;height:32px;border-radius:10px;background:var(--accent);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M6 17 L6 7 L12 7 Q16 7 16 11 Q16 15 12 15 L6 15" stroke="white" stroke-width="2.5" fill="none" stroke-linecap="round"/></svg>
+            </div>
+            <span>BUILDER VENTURE STUDIO</span>
+        </div>
+        <div class="nav-actions">
+            <button class="lang-btn active" id="btnEs" onclick="setLang('es')">ES</button>
+            <button class="lang-btn" id="btnEn" onclick="setLang('en')">EN</button>
+            <button class="icon-btn" onclick="toggleDark()" id="darkBtn"><i class="fas fa-moon"></i></button>
+            <button class="icon-btn" onclick="toggleMenu()"><i class="fas fa-bars"></i></button>
+        </div>
+    </div>
+</nav>
+
+<div id="navMenu" class="nav-menu">
+    <button onclick="toggleMenu()" style="position:absolute;top:1.5rem;right:1.5rem;background:none;border:none;cursor:pointer;"><i class="fas fa-times" style="color:white;font-size:1.5rem;"></i></button>
+    <a href="#proyectos" onclick="toggleMenu()" data-es="Proyectos" data-en="Projects">Proyectos</a>
+    <a href="#metricas" onclick="toggleMenu()" data-es="Métricas" data-en="Metrics">Métricas</a>
+    <a href="#contacto" onclick="toggleMenu()" data-es="Contacto" data-en="Contact">Contacto</a>
+    <a href="admin.html" style="font-size:1rem;opacity:0.4;" data-es="Acceso admin" data-en="Admin access">Acceso admin</a>
+</div>
+
+<!-- HERO -->
+<section style="position:relative;min-height:100vh;display:flex;align-items:center;justify-content:center;overflow:hidden;">
+    <div style="position:absolute;inset:0;z-index:0;">
+        <video autoplay loop muted playsinline style="width:100%;height:100%;object-fit:cover;">
+            <source src="https://videos.pexels.com/video-files/3129595/3129595-uhd_2560_1440_30fps.mp4" type="video/mp4">
+        </video>
+        <div style="position:absolute;inset:0;background:linear-gradient(to bottom,rgba(0,0,0,0.4),rgba(0,0,0,0.7));"></div>
+    </div>
+    <div style="position:relative;z-index:1;text-align:center;padding:6rem 1.5rem 2rem;max-width:900px;margin:0 auto;">
+        <div class="glass reveal" style="border-radius:2rem;padding:2rem 1.5rem;">
+            <div style="display:inline-flex;align-items:center;gap:0.5rem;padding:0.25rem 0.75rem;border-radius:100px;background:rgba(255,255,255,0.15);margin-bottom:1rem;">
+                <span style="width:8px;height:8px;border-radius:50%;background:#4ade80;display:inline-block;"></span>
+                <span style="font-size:0.75rem;color:white;font-weight:500;" data-es="AI-Powered Venture Studio" data-en="AI-Powered Venture Studio">AI-Powered Venture Studio</span>
+            </div>
+            <h1 style="font-size:clamp(2rem,6vw,4.5rem);font-weight:800;color:white;line-height:1.1;margin-bottom:1rem;" data-es="Construimos productos<br>con inteligencia artificial" data-en="We build products<br>with artificial intelligence">Construimos productos<br>con inteligencia artificial</h1>
+            <p style="font-size:clamp(0.875rem,2vw,1.125rem);color:rgba(255,255,255,0.8);max-width:600px;margin:0 auto 1.5rem;line-height:1.6;" data-es="BUILDER VENTURE STUDIO es un estudio de construcción de productos digitales. Usamos IA para acelerar el desarrollo, validar ideas y lanzar ventures funcionales en semanas, no meses." data-en="BUILDER VENTURE STUDIO is a digital product studio. We use AI to accelerate development, validate ideas, and launch functional ventures in weeks, not months.">BUILDER VENTURE STUDIO es un estudio de construcción de productos digitales. Usamos IA para acelerar el desarrollo, validar ideas y lanzar ventures funcionales en semanas, no meses.</p>
+            <div style="display:flex;flex-wrap:wrap;gap:0.75rem;justify-content:center;">
+                <a href="#proyectos" class="btn-primary" style="padding:0.75rem 1.75rem;border-radius:100px;font-size:0.875rem;font-weight:600;text-decoration:none;" data-es="Ver proyectos" data-en="See projects">Ver proyectos</a>
+                <a href="#contacto" style="padding:0.75rem 1.75rem;border-radius:100px;font-size:0.875rem;font-weight:600;text-decoration:none;color:white;background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.3);" data-es="Hablemos" data-en="Let's talk">Hablemos</a>
+            </div>
+        </div>
+        <div style="margin-top:2rem;"><i class="fas fa-chevron-down" style="color:rgba(255,255,255,0.4);font-size:1.25rem;"></i></div>
+    </div>
+</section>
+
+<!-- MARQUEE -->
+<section style="padding:2rem 0;background:var(--bg2);overflow:hidden;">
+    <p style="text-align:center;font-size:0.75rem;font-weight:500;color:var(--text2);margin-bottom:1rem;" data-es="Tecnologías que utilizamos" data-en="Technologies we use">Tecnologías que utilizamos</p>
+    <div class="marquee">
+        <div class="marquee-content" style="align-items:center;">
+            <span style="opacity:0.5;font-weight:500;white-space:nowrap;color:var(--text);">OpenAI</span><span style="opacity:0.5;font-weight:500;white-space:nowrap;color:var(--text);">Anthropic</span><span style="opacity:0.5;font-weight:500;white-space:nowrap;color:var(--text);">Replicate</span><span style="opacity:0.5;font-weight:500;white-space:nowrap;color:var(--text);">Stability AI</span><span style="opacity:0.5;font-weight:500;white-space:nowrap;color:var(--text);">LangChain</span><span style="opacity:0.5;font-weight:500;white-space:nowrap;color:var(--text);">Vercel</span><span style="opacity:0.5;font-weight:500;white-space:nowrap;color:var(--text);">Supabase</span>
+            <span style="opacity:0.5;font-weight:500;white-space:nowrap;color:var(--text);">OpenAI</span><span style="opacity:0.5;font-weight:500;white-space:nowrap;color:var(--text);">Anthropic</span><span style="opacity:0.5;font-weight:500;white-space:nowrap;color:var(--text);">Replicate</span><span style="opacity:0.5;font-weight:500;white-space:nowrap;color:var(--text);">Stability AI</span><span style="opacity:0.5;font-weight:500;white-space:nowrap;color:var(--text);">LangChain</span><span style="opacity:0.5;font-weight:500;white-space:nowrap;color:var(--text);">Vercel</span><span style="opacity:0.5;font-weight:500;white-space:nowrap;color:var(--text);">Supabase</span>
+        </div>
+    </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- METRICAS -->
+<section id="metricas" style="padding:5rem 1.5rem;background:var(--bg);">
+    <div style="max-width:1440px;margin:0 auto;">
+        <div class="reveal" style="max-width:600px;margin-bottom:3rem;">
+            <h2 style="font-size:clamp(1.75rem,4vw,3rem);font-weight:700;margin-bottom:0.75rem;" data-es="Impacto medible" data-en="Measurable impact">Impacto medible</h2>
+            <p style="color:var(--text2);" data-es="Resultados que demuestran nuestra capacidad de ejecución." data-en="Results that demonstrate our execution capacity.">Resultados que demuestran nuestra capacidad de ejecución.</p>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1rem;max-width:800px;">
+            <div class="reveal" style="background:var(--bg2);border-radius:1.5rem;padding:1.5rem;text-align:center;">
+                <div style="font-size:2.5rem;font-weight:800;color:var(--accent);" data-count="4">0</div>
+                <div style="font-size:0.75rem;color:var(--text2);margin-top:0.25rem;" data-es="Proyectos lanzados" data-en="Projects launched">Proyectos lanzados</div>
+            </div>
+            <div class="reveal" style="background:var(--bg2);border-radius:1.5rem;padding:1.5rem;text-align:center;">
+                <div style="font-size:2.5rem;font-weight:800;color:var(--accent);" data-count="12">0</div>
+                <div style="font-size:0.75rem;color:var(--text2);margin-top:0.25rem;" data-es="Semanas de build a launch" data-en="Weeks from build to launch">Semanas de build a launch</div>
+            </div>
+            <div class="reveal" style="background:var(--bg2);border-radius:1.5rem;padding:1.5rem;text-align:center;">
+                <div style="font-size:2.5rem;font-weight:800;color:var(--accent);" data-count="100">0</div>
+                <div style="font-size:0.75rem;color:var(--text2);margin-top:0.25rem;" data-es="% IA en el workflow" data-en="% AI in the workflow">% IA en el workflow</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- PROYECTOS -->
+<section id="proyectos" style="padding:5rem 1.5rem;background:var(--bg2);">
+    <div style="max-width:1440px;margin:0 auto;">
+        <div class="reveal" style="max-width:600px;margin-bottom:3rem;">
+            <h2 style="font-size:clamp(1.75rem,4vw,3rem);font-weight:700;margin-bottom:0.75rem;" data-es="Proyectos en construcción" data-en="Projects in development">Proyectos en construcción</h2>
+            <p style="color:var(--text2);" data-es="Ventures que estamos construyendo actualmente con IA como acelerador." data-en="Ventures we are currently building with AI as the accelerator.">Ventures que estamos construyendo actualmente con IA como acelerador.</p>
+        </div>
+        <div id="proyectosGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:1.5rem;"></div>
+    </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- CONTACTO -->
+<section id="contacto" style="padding:5rem 1.5rem;background:var(--bg);">
+    <div style="max-width:1440px;margin:0 auto;">
+        <div class="reveal" style="border-radius:2rem;padding:3rem 2rem;text-align:center;border:1px solid var(--border);background:var(--bg2);">
+            <h2 style="font-size:clamp(1.75rem,4vw,2.5rem);font-weight:700;margin-bottom:0.75rem;" data-es="¿Construimos algo juntos?" data-en="Shall we build something together?">¿Construimos algo juntos?</h2>
+            <p style="color:var(--text2);max-width:500px;margin:0 auto 1.5rem;" data-es="Si tienes una idea o quieres formar parte del próximo venture, hablemos." data-en="If you have an idea or want to be part of the next venture, let's talk.">Si tienes una idea o quieres formar parte del próximo venture, hablemos.</p>
+            <div style="display:flex;flex-wrap:wrap;gap:0.75rem;justify-content:center;">
+                <a href="mailto:leopoldosolis86@yahoo.com" class="btn-primary" style="padding:0.75rem 1.5rem;border-radius:100px;font-size:0.875rem;font-weight:600;text-decoration:none;display:inline-flex;align-items:center;gap:0.5rem;"><i class="fas fa-envelope"></i> Email</a>
+                <a href="https://ar.linkedin.com/in/jorge-leopoldo-solis-6a04a036a" target="_blank" style="padding:0.75rem 1.5rem;border-radius:100px;font-size:0.875rem;font-weight:600;text-decoration:none;display:inline-flex;align-items:center;gap:0.5rem;border:1px solid var(--border);color:var(--text);"><i class="fab fa-linkedin"></i> LinkedIn</a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<footer style="border-top:1px solid var(--border);padding:2rem;text-align:center;font-size:0.75rem;color:var(--text2);background:var(--bg);">© 2026 BUILDER VENTURE STUDIO</footer>
+
+<!-- MODAL -->
+<div id="modal" class="modal">
+    <div class="modal-box">
+        <div class="modal-header">
+            <span id="modalTitulo" style="font-weight:600;font-size:0.9rem;"></span>
+            <button onclick="cerrarModal()" style="background:none;border:none;cursor:pointer;color:#9ca3af;font-size:1.25rem;"><i class="fas fa-times"></i></button>
+        </div>
+        <iframe id="iframeProyecto" title="Vista previa"></iframe>
+    </div>
+</div>
+
+<script>
+    const SUPABASE_URL = 'https://hniumqxaqfjvumimwtyp.supabase.co';
+    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhuaXVtcXhhcWZqdnVtaW13dHlwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAwMTc2MjAsImV4cCI6MjA5NTU5MzYyMH0.JC7Hscdy7lpiMIaDD02vteh5aw9GDdEPCzmzBvUMs9Q';
+    let proyectos = [];
+    let lang = 'es';
+
+    // DARK MODE
+    function toggleDark() {
+        document.body.classList.toggle('dark');
+        const isDark = document.body.classList.contains('dark');
+        document.getElementById('darkBtn').innerHTML = isDark ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
+        localStorage.setItem('dark', isDark);
+    }
+    if (localStorage.getItem('dark') === 'true') { document.body.classList.add('dark'); document.getElementById('darkBtn').innerHTML = '<i class="fas fa-sun"></i>'; }
+
+    // LANGUAGE
+    function setLang(l) {
+        lang = l;
+        document.getElementById('btnEs').classList.toggle('active', l === 'es');
+        document.getElementById('btnEn').classList.toggle('active', l === 'en');
+        document.querySelectorAll('[data-es]').forEach(el => {
+            const txt = el.getAttribute('data-' + l);
+            if (txt) el.innerHTML = txt;
+        });
+        renderizarProyectos();
+    }
+
+    // NAV MENU
+    function toggleMenu() { document.getElementById('navMenu').classList.toggle('open'); }
+
+    // LOAD PROJECTS
+    async function cargarProyectos() {
+        try {
+            const res = await fetch(`${SUPABASE_URL}/rest/v1/proyectos?activo=eq.true&order=created_at.desc`, {
+                headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
+            });
+            proyectos = await res.json();
+            renderizarProyectos();
+        } catch(e) {
+            console.error('Error:', e);
+            document.getElementById('proyectosGrid').innerHTML = '<p style="color:#9ca3af;grid-column:1/-1;text-align:center;padding:3rem 0;">Error al cargar proyectos.</p>';
+        }
+    }
+
+    function renderizarProyectos() {
+        const grid = document.getElementById('proyectosGrid');
+        if (!proyectos || !proyectos.length) {
+            grid.innerHTML = `<p style="color:var(--text2);grid-column:1/-1;text-align:center;padding:3rem 0;">${lang==='es'?'No hay proyectos activos aún.':'No active projects yet.'}</p>`;
+            return;
+        }
+        grid.innerHTML = proyectos.map(p => {
+            const nombre = lang === 'en' && p.nombre_en ? p.nombre_en : p.nombre;
+            const desc = lang === 'en' && p.descripcion_en ? p.descripcion_en : (p.descripcion || '');
+            const estado = lang === 'en' && p.estado_en ? p.estado_en : p.estado;
+            return `
+            <div class="project-card reveal" onclick="verProyecto(${p.id})">
+                <div class="preview-container">
+                    ${p.logo_data ? `<img src="${p.logo_data}" alt="${escHtml(nombre)}">` : `<div class="no-img">${lang==='es'?'Sin vista previa':'No preview'}</div>`}
+                    <div class="play-btn"><i class="fas fa-play"></i></div>
+                </div>
+                <div class="card-body">
+                    <h3 style="font-size:1.1rem;font-weight:600;margin-bottom:0.4rem;color:var(--text);">${escHtml(nombre)}</h3>
+                    <p style="font-size:0.8rem;color:var(--text2);margin-bottom:0.75rem;">${escHtml(desc)}</p>
+                    <div style="display:flex;justify-content:space-between;align-items:center;">
+                        <span class="status-badge">${escHtml(estado)}</span>
+                        <div style="display:flex;gap:0.75rem;">
+                            <a href="mailto:leopoldosolis86@yahoo.com" style="color:var(--text2);font-size:0.75rem;" onclick="event.stopPropagation()"><i class="fas fa-envelope"></i></a>
+                            <a href="https://ar.linkedin.com/in/jorge-leopoldo-solis-6a04a036a" target="_blank" style="color:var(--text2);font-size:0.75rem;" onclick="event.stopPropagation()"><i class="fab fa-linkedin"></i></a>
+                        </div>
+                    </div>
+                </div>
+            </div>`;
+        }).join('');
+        document.querySelectorAll('.reveal').forEach(el => revealObs.observe(el));
+    }
+
+    function verProyecto(id) {
+        const p = proyectos.find(x => x.id == id);
+        if (p && p.html_content) {
+            document.getElementById('modalTitulo').innerText = (lang==='en' && p.nombre_en) ? p.nombre_en : p.nombre;
+            const blob = new Blob([p.html_content], { type: 'text/html' });
+            document.getElementById('iframeProyecto').src = URL.createObjectURL(blob);
+            document.getElementById('modal').classList.add('active');
+        }
+    }
+    function cerrarModal() { document.getElementById('modal').classList.remove('active'); document.getElementById('iframeProyecto').src=''; }
+    document.getElementById('modal').addEventListener('click', e => { if(e.target===document.getElementById('modal')) cerrarModal(); });
+
+    function escHtml(s) { if(!s)return''; return s.replace(/[&<>]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[m])); }
+
+    // COUNTERS
+    document.querySelectorAll('[data-count]').forEach(el => {
+        const target = +el.getAttribute('data-count');
+        const obs = new IntersectionObserver(entries => {
+            if(entries[0].isIntersecting){ let n=0; const t=setInterval(()=>{el.innerText=++n;if(n>=target)clearInterval(t);},20); obs.unobserve(el); }
+        },{threshold:.5});
+        obs.observe(el);
+    });
+
+    // REVEAL
+    const revealObs = new IntersectionObserver(entries => {
+        entries.forEach(e => { if(e.isIntersecting){e.target.classList.add('visible');revealObs.unobserve(e.target);} });
+    },{threshold:.1});
+    document.querySelectorAll('.reveal').forEach(el => revealObs.observe(el));
+
+    window.addEventListener('load', cargarProyectos);
+</script>
+</body>
+</html>
