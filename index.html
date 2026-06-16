@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>BUILDER VENTURE STUDIO | AI-Native Venture Builder</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        :root{--accent:#0071E3;--bg:#fff;--bg2:#F5F5F7;--text:#1D1D1F;--text2:#6E6E73;--card:#fff;--border:rgba(0,0,0,0.08);--nav:rgba(255,255,255,0.85);--nav-b:#eee;}
+        body.dark{--bg:#0A0A0A;--bg2:#1a1a1a;--text:#f5f5f7;--text2:#a1a1a6;--card:#1c1c1e;--border:rgba(255,255,255,0.1);--nav:rgba(10,10,10,0.9);--nav-b:#2a2a2a;}
+        *{margin:0;padding:0;box-sizing:border-box;}
+        body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);overflow-x:hidden;transition:background .3s,color .3s;}
+        .glass{background:rgba(255,255,255,0.15);backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,0.25);}
+        .btn-primary{background:var(--accent);color:white;transition:all .3s;text-decoration:none;display:inline-flex;align-items:center;gap:.5rem;}
+        .btn-primary:hover{background:#0077ED;transform:translateY(-2px);}
+        .btn-secondary{background:none;border:1px solid var(--border);color:var(--text);text-decoration:none;display:inline-flex;align-items:center;gap:.5rem;transition:all .3s;}
+        .btn-secondary:hover{border-color:var(--accent);color:var(--accent);}
+
+        nav{position:fixed;top:0;width:100%;z-index:100;background:var(--nav);backdrop-filter:blur(16px);border-bottom:1px solid var(--nav-b);padding:.875rem 1.5rem;transition:background .3s,border-color .3s;}
+        .nav-inner{max-width:1200px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;gap:.75rem;}
+        .nav-logo{display:flex;align-items:center;gap:.5rem;}
+        .nav-logo span{font-weight:700;font-size:.9rem;color:var(--text);letter-spacing:-.01em;}
+        .nav-actions{display:flex;align-items:center;gap:.5rem;}
+        .icon-btn{background:none;border:none;cursor:pointer;padding:6px;color:var(--text);font-size:1rem;}
+        .lang-btn{font-size:.7rem;font-weight:700;padding:.2rem .5rem;border-radius:100px;border:1px solid var(--nav-b);background:none;color:var(--text);cursor:pointer;transition:all .2s;}
+        .lang-btn.active{background:var(--accent);color:white;border-color:var(--accent);}
+        .nav-menu{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.96);z-index:200;flex-direction:column;align-items:center;justify-content:center;gap:2rem;}
+        .nav-menu.open{display:flex;}
+        .nav-menu a{color:white;font-size:1.4rem;font-weight:600;text-decoration:none;transition:opacity .2s;}
+        .nav-menu a:hover{opacity:.6;}
+
+        /* HERO */
+        .hero{position:relative;min-height:100vh;display:flex;align-items:center;justify-content:center;overflow:hidden;}
+        .hero-overlay{position:absolute;inset:0;background:linear-gradient(to bottom,rgba(0,0,0,0.45),rgba(0,0,0,0.75));}
+        .hero video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;}
+
+        /* SECTIONS */
+        .section{padding:5rem 1.5rem;}
+        .section-inner{max-width:1200px;margin:0 auto;}
+        .section-header{max-width:640px;margin-bottom:3rem;}
+        .section-label{font-size:.7rem;font-weight:700;letter-spacing:.1em;color:var(--accent);text-transform:uppercase;margin-bottom:.75rem;display:block;}
+        .section-title{font-size:clamp(1.75rem,4vw,2.75rem);font-weight:800;line-height:1.15;margin-bottom:.75rem;}
+        .section-sub{color:var(--text2);font-size:.95rem;line-height:1.6;}
+
+        /* PHILOSOPHY */
+        .phil-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:1.25rem;}
+        .phil-card{background:var(--bg2);border-radius:1.5rem;padding:1.75rem;border:1px solid var(--border);transition:border-color .3s;}
+        .phil-card:hover{border-color:var(--accent);}
+        .phil-icon{width:40px;height:40px;border-radius:12px;background:var(--accent);display:flex;align-items:center;justify-content:center;margin-bottom:1rem;}
+        .phil-icon i{color:white;font-size:.9rem;}
+        .phil-title{font-weight:700;font-size:1rem;margin-bottom:.5rem;}
+        .phil-text{font-size:.85rem;color:var(--text2);line-height:1.6;}
+
+        /* HOW IT WORKS */
+        .steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1.5rem;position:relative;}
+        .step{background:var(--bg2);border-radius:1.5rem;padding:1.75rem;border:1px solid var(--border);position:relative;}
+        .step-num{font-size:3rem;font-weight:900;color:var(--accent);opacity:.15;position:absolute;top:1rem;right:1.25rem;line-height:1;}
+        .step-icon{width:44px;height:44px;border-radius:12px;background:var(--accent);display:flex;align-items:center;justify-content:center;margin-bottom:1rem;}
+        .step-icon i{color:white;}
+        .step-title{font-weight:700;margin-bottom:.4rem;}
+        .step-text{font-size:.85rem;color:var(--text2);line-height:1.6;}
+
+        /* METRICS */
+        .metrics-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:1rem;max-width:800px;}
+        .metric-card{background:var(--bg2);border-radius:1.5rem;padding:1.5rem;text-align:center;border:1px solid var(--border);}
+        .metric-num{font-size:2.5rem;font-weight:900;color:var(--accent);}
+        .metric-label{font-size:.75rem;color:var(--text2);margin-top:.25rem;}
+
+        /* PROJECT CARDS */
+        .projects-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:1.5rem;}
+        .project-card{background:var(--card);border:1px solid var(--border);border-radius:1.5rem;transition:all .3s;cursor:pointer;overflow:hidden;}
+        .project-card:hover{transform:translateY(-6px);border-color:var(--accent);box-shadow:0 16px 32px rgba(0,0,0,0.12);}
+        .preview-wrap{position:relative;width:100%;padding-bottom:52%;overflow:hidden;background:var(--bg2);}
+        .preview-wrap img{position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;transition:transform .3s;}
+        .project-card:hover .preview-wrap img{transform:scale(1.05);}
+        .no-preview{position:absolute;top:0;left:0;width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:var(--text2);font-size:.85rem;}
+        .play-btn{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:48px;height:48px;background:var(--accent);border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 16px rgba(0,113,227,.4);}
+        .play-btn i{color:white;font-size:1rem;margin-left:3px;}
+        .card-body{padding:1.25rem;}
+        .card-title{font-size:1.05rem;font-weight:700;margin-bottom:.35rem;}
+        .card-desc{font-size:.82rem;color:var(--text2);margin-bottom:.75rem;line-height:1.5;}
+        .card-badges{display:flex;flex-wrap:wrap;gap:.4rem;margin-bottom:.85rem;}
+        .badge{font-size:.68rem;font-weight:600;padding:.2rem .65rem;border-radius:100px;display:inline-block;}
+        .badge-stage{background:var(--bg2);color:var(--text2);}
+        .badge-inv{background:#EFF6FF;color:#1D4ED8;}
+        .badge-team{background:#F0FDF4;color:#166534;}
+        .badge-both{background:#FEF3C7;color:#92400E;}
+        body.dark .badge-inv{background:#1e3a5f;color:#93C5FD;}
+        body.dark .badge-team{background:#14402a;color:#86EFAC;}
+        body.dark .badge-both{background:#3d2c00;color:#FCD34D;}
+        .card-traction{font-size:.78rem;color:var(--text2);margin-bottom:.85rem;display:flex;align-items:center;gap:.4rem;}
+        .card-traction i{color:var(--accent);}
+        .card-actions{display:flex;gap:.5rem;flex-wrap:wrap;}
+        .card-btn{font-size:.75rem;font-weight:600;padding:.4rem .9rem;border-radius:100px;border:none;cursor:pointer;transition:all .2s;text-decoration:none;}
+        .card-btn-inv{background:#EFF6FF;color:#1D4ED8;}
+        .card-btn-inv:hover{background:#1D4ED8;color:white;}
+        .card-btn-team{background:#F0FDF4;color:#166534;}
+        .card-btn-team:hover{background:#166534;color:white;}
+        body.dark .card-btn-inv{background:#1e3a5f;color:#93C5FD;}
+        body.dark .card-btn-team{background:#14402a;color:#86EFAC;}
+
+        /* SUMMARY TABLE */
+        .summary-table{width:100%;border-collapse:collapse;font-size:.85rem;}
+        .summary-table th{text-align:left;padding:.75rem 1rem;font-size:.72rem;font-weight:700;letter-spacing:.05em;color:var(--text2);text-transform:uppercase;border-bottom:1px solid var(--border);}
+        .summary-table td{padding:.85rem 1rem;border-bottom:1px solid var(--border);color:var(--text);}
+        .summary-table tr:last-child td{border-bottom:none;}
+        .summary-table tr:hover td{background:var(--bg2);}
+        .table-wrap{background:var(--card);border:1px solid var(--border);border-radius:1.5rem;overflow:hidden;overflow-x:auto;}
+
+        /* FORM */
+        .form-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:1rem;}
+        .form-field{display:flex;flex-direction:column;gap:.4rem;}
+        .form-field label{font-size:.8rem;font-weight:600;color:var(--text2);}
+        .form-field input,.form-field select,.form-field textarea{background:var(--bg2);border:1px solid var(--border);border-radius:.75rem;padding:.65rem 1rem;font-size:.9rem;color:var(--text);font-family:'Inter',sans-serif;outline:none;transition:border-color .2s;}
+        .form-field input:focus,.form-field select:focus,.form-field textarea:focus{border-color:var(--accent);}
+        .form-field textarea{resize:vertical;min-height:100px;}
+        .form-field select option{background:var(--bg);}
+
+        /* MODAL */
+        .modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.85);backdrop-filter:blur(12px);z-index:1000;align-items:center;justify-content:center;}
+        .modal.active{display:flex;}
+        .modal-box{width:90%;max-width:1300px;height:85vh;background:white;border-radius:28px;overflow:hidden;}
+        .modal-box iframe{width:100%;height:calc(100% - 56px);border:none;}
+        .modal-header{display:flex;justify-content:space-between;align-items:center;padding:0 1.25rem;height:56px;border-bottom:1px solid #eee;}
+
+        /* MISC */
+        .reveal{opacity:0;transform:translateY(20px);transition:opacity .6s ease,transform .6s ease;}
+        .reveal.visible{opacity:1;transform:translateY(0);}
+        .marquee{overflow:hidden;}
+        .marquee-content{display:flex;animation:marquee 30s linear infinite;gap:3rem;}
+        @keyframes marquee{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+        .divider{height:1px;background:linear-gradient(90deg,transparent,var(--border),transparent);}
+        .tag-pill{display:inline-flex;align-items:center;gap:.35rem;font-size:.75rem;font-weight:600;padding:.3rem .75rem;border-radius:100px;background:var(--bg2);color:var(--text2);}
+        .toast{position:fixed;bottom:1.5rem;right:1.5rem;background:#1A1A1A;color:white;padding:.75rem 1.25rem;border-radius:100px;font-size:.8rem;z-index:2000;border-left:3px solid var(--accent);animation:slideIn .3s ease;}
+        @keyframes slideIn{from{transform:translateX(100%);opacity:0}to{transform:translateX(0);opacity:1}}
+    </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+    <div class="nav-inner">
+        <div class="nav-logo">
+            <div style="width:32px;height:32px;border-radius:10px;background:var(--accent);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M6 17 L6 7 L12 7 Q16 7 16 11 Q16 15 12 15 L6 15" stroke="white" stroke-width="2.5" fill="none" stroke-linecap="round"/></svg>
+            </div>
+            <span>BUILDER VENTURE STUDIO</span>
+        </div>
+        <div class="nav-actions">
+            <button class="lang-btn active" id="btnEs" onclick="setLang('es')">ES</button>
+            <button class="lang-btn" id="btnEn" onclick="setLang('en')">EN</button>
+            <button class="icon-btn" onclick="toggleDark()" id="darkBtn"><i class="fas fa-moon"></i></button>
+            <button class="icon-btn" onclick="toggleMenu()"><i class="fas fa-bars"></i></button>
+        </div>
+    </div>
+</nav>
+
+<!-- MOBILE MENU -->
+<div id="navMenu" class="nav-menu">
+    <button onclick="toggleMenu()" style="position:absolute;top:1.5rem;right:1.5rem;background:none;border:none;cursor:pointer;"><i class="fas fa-times" style="color:white;font-size:1.5rem;"></i></button>
+    <a href="#filosofia" onclick="toggleMenu()" data-es="Filosofía" data-en="Philosophy">Filosofía</a>
+    <a href="#como-funciona" onclick="toggleMenu()" data-es="Cómo funciona" data-en="How it works">Cómo funciona</a>
+    <a href="#proyectos" onclick="toggleMenu()" data-es="Proyectos" data-en="Projects">Proyectos</a>
+    <a href="#sumate" onclick="toggleMenu()" data-es="Sumate" data-en="Join us">Sumate</a>
+    <a href="#contacto" onclick="toggleMenu()" data-es="Contacto" data-en="Contact">Contacto</a>
+    <a href="admin.html" style="font-size:1rem;opacity:.35;" data-es="Admin" data-en="Admin">Admin</a>
+</div>
+
+<!-- HERO -->
+<section class="hero">
+    <video autoplay loop muted playsinline>
+        <source src="https://videos.pexels.com/video-files/3129595/3129595-uhd_2560_1440_30fps.mp4" type="video/mp4">
+    </video>
+    <div class="hero-overlay"></div>
+    <div style="position:relative;z-index:1;text-align:center;padding:6rem 1.5rem 2rem;max-width:900px;margin:0 auto;">
+        <div class="glass reveal" style="border-radius:2rem;padding:2.5rem 2rem;">
+            <div style="display:inline-flex;align-items:center;gap:.5rem;padding:.25rem .85rem;border-radius:100px;background:rgba(255,255,255,0.12);margin-bottom:1.25rem;border:1px solid rgba(255,255,255,.2);">
+                <span style="width:7px;height:7px;border-radius:50%;background:#4ade80;display:inline-block;"></span>
+                <span style="font-size:.75rem;color:white;font-weight:600;letter-spacing:.02em;" data-es="AI-Native Venture Studio · Pre-Seed Stage" data-en="AI-Native Venture Studio · Pre-Seed Stage">AI-Native Venture Studio · Pre-Seed Stage</span>
+            </div>
+            <h1 style="font-size:clamp(2rem,5.5vw,4rem);font-weight:900;color:white;line-height:1.1;margin-bottom:1rem;letter-spacing:-.02em;" data-es="Construimos el futuro<br>con inteligencia artificial" data-en="Building the future<br>with artificial intelligence">Construimos el futuro<br>con inteligencia artificial</h1>
+            <p style="font-size:clamp(.9rem,2vw,1.1rem);color:rgba(255,255,255,.8);max-width:580px;margin:0 auto 1.75rem;line-height:1.65;" data-es="Venture studio AI-native en etapa pre-seed. Construimos, validamos y lanzamos productos digitales en semanas. Buscamos inversores ángel y co-founders técnicos para escalar." data-en="AI-native venture studio at pre-seed stage. We build, validate and launch digital products in weeks. Seeking angel investors and technical co-founders to scale.">Venture studio AI-native en etapa pre-seed. Construimos, validamos y lanzamos productos digitales en semanas. Buscamos inversores ángel y co-founders técnicos para escalar.</p>
+            <div style="display:flex;flex-wrap:wrap;gap:.75rem;justify-content:center;">
+                <a href="#proyectos" class="btn-primary" style="padding:.8rem 1.75rem;border-radius:100px;font-size:.875rem;font-weight:700;" data-es="Ver proyectos" data-en="See projects">Ver proyectos</a>
+                <a href="#sumate" style="padding:.8rem 1.75rem;border-radius:100px;font-size:.875rem;font-weight:700;text-decoration:none;color:white;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.25);" data-es="Invertir / Unirme" data-en="Invest / Join">Invertir / Unirme</a>
+            </div>
+        </div>
+        <div style="margin-top:2rem;"><i class="fas fa-chevron-down" style="color:rgba(255,255,255,.4);font-size:1.1rem;"></i></div>
+    </div>
+</section>
+
+<!-- MARQUEE -->
+<section style="padding:1.75rem 0;background:var(--bg2);overflow:hidden;">
+    <div class="marquee">
+        <div class="marquee-content" style="align-items:center;">
+            <span class="tag-pill"><i class="fas fa-robot"></i> OpenAI</span>
+            <span class="tag-pill"><i class="fas fa-robot"></i> Anthropic</span>
+            <span class="tag-pill"><i class="fas fa-code"></i> Supabase</span>
+            <span class="tag-pill"><i class="fas fa-code"></i> Vercel</span>
+            <span class="tag-pill"><i class="fas fa-robot"></i> Replicate</span>
+            <span class="tag-pill"><i class="fas fa-code"></i> LangChain</span>
+            <span class="tag-pill"><i class="fas fa-robot"></i> Stability AI</span>
+            <span class="tag-pill"><i class="fas fa-code"></i> Next.js</span>
+            <span class="tag-pill"><i class="fas fa-robot"></i> OpenAI</span>
+            <span class="tag-pill"><i class="fas fa-robot"></i> Anthropic</span>
+            <span class="tag-pill"><i class="fas fa-code"></i> Supabase</span>
+            <span class="tag-pill"><i class="fas fa-code"></i> Vercel</span>
+            <span class="tag-pill"><i class="fas fa-robot"></i> Replicate</span>
+            <span class="tag-pill"><i class="fas fa-code"></i> LangChain</span>
+            <span class="tag-pill"><i class="fas fa-robot"></i> Stability AI</span>
+            <span class="tag-pill"><i class="fas fa-code"></i> Next.js</span>
+        </div>
+    </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- FILOSOFIA -->
+<section class="section" id="filosofia" style="background:var(--bg);">
+    <div class="section-inner">
+        <div class="section-header reveal">
+            <span class="section-label" data-es="Filosofía" data-en="Philosophy">Filosofía</span>
+            <h2 class="section-title" data-es="Por qué Builder Venture Studio" data-en="Why Builder Venture Studio">Por qué Builder Venture Studio</h2>
+            <p class="section-sub" data-es="No somos una agencia. No somos un fondo. Somos un venture studio AI-native que construye productos reales con radical transparency y mentalidad build-first." data-en="We are not an agency. We are not a fund. We are an AI-native venture studio that builds real products with radical transparency and a build-first mentality.">No somos una agencia. No somos un fondo. Somos un venture studio AI-native que construye productos reales con radical transparency y mentalidad build-first.</p>
+        </div>
+        <div class="phil-grid">
+            <div class="phil-card reveal">
+                <div class="phil-icon"><i class="fas fa-bolt"></i></div>
+                <div class="phil-title" data-es="Build-First Mentality" data-en="Build-First Mentality">Build-First Mentality</div>
+                <div class="phil-text" data-es="Lanzamos antes de pitchear. Cada producto llega a producción antes de buscar capital o equipo. Los MVPs hablan por sí solos." data-en="We ship before we pitch. Every product reaches production before seeking capital or team. MVPs speak for themselves.">Lanzamos antes de pitchear. Cada producto llega a producción antes de buscar capital o equipo. Los MVPs hablan por sí solos.</div>
+            </div>
+            <div class="phil-card reveal">
+                <div class="phil-icon"><i class="fas fa-eye"></i></div>
+                <div class="phil-title" data-es="Radical Transparency" data-en="Radical Transparency">Radical Transparency</div>
+                <div class="phil-text" data-es="Métricas abiertas, cap table documentado, roadmap público. Inversores y co-founders acceden a información real desde el día uno." data-en="Open metrics, documented cap table, public roadmap. Investors and co-founders access real information from day one.">Métricas abiertas, cap table documentado, roadmap público. Inversores y co-founders acceden a información real desde el día uno.</div>
+            </div>
+            <div class="phil-card reveal">
+                <div class="phil-icon"><i class="fas fa-robot"></i></div>
+                <div class="phil-title" data-es="AI-Native desde el Día 1" data-en="AI-Native from Day 1">AI-Native desde el Día 1</div>
+                <div class="phil-text" data-es="Cada producto se construye con IA como capa central, no como feature adicional. Esto reduce el time-to-market y el costo de desarrollo drásticamente." data-en="Every product is built with AI as the core layer, not as an additional feature. This drastically reduces time-to-market and development costs.">Cada producto se construye con IA como capa central, no como feature adicional. Esto reduce el time-to-market y el costo de desarrollo drásticamente.</div>
+            </div>
+            <div class="phil-card reveal">
+                <div class="phil-icon"><i class="fas fa-handshake"></i></div>
+                <div class="phil-title" data-es="Skin in the Game" data-en="Skin in the Game">Skin in the Game</div>
+                <div class="phil-text" data-es="Usamos instrumentos estándar del ecosistema: SAFEs, contratos YC-style, vesting schedules. Todo documentado y auditeable." data-en="We use ecosystem-standard instruments: SAFEs, YC-style contracts, vesting schedules. Everything documented and auditable.">Usamos instrumentos estándar del ecosistema: SAFEs, contratos YC-style, vesting schedules. Todo documentado y auditeable.</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- COMO FUNCIONA -->
+<section class="section" id="como-funciona" style="background:var(--bg2);">
+    <div class="section-inner">
+        <div class="section-header reveal">
+            <span class="section-label" data-es="Proceso" data-en="Process">Proceso</span>
+            <h2 class="section-title" data-es="Cómo funciona" data-en="How it works">Cómo funciona</h2>
+            <p class="section-sub" data-es="De la idea al producto en producción. Sin burocracia, con IA como motor." data-en="From idea to production product. No bureaucracy, with AI as the engine.">De la idea al producto en producción. Sin burocracia, con IA como motor.</p>
+        </div>
+        <div class="steps">
+            <div class="step reveal">
+                <div class="step-num">01</div>
+                <div class="step-icon"><i class="fas fa-lightbulb"></i></div>
+                <div class="step-title" data-es="Idea & Validación" data-en="Idea & Validation">Idea & Validación</div>
+                <div class="step-text" data-es="Identificamos un problema real con mercado potencial. Validamos hipótesis antes de escribir una sola línea de código." data-en="We identify a real problem with market potential. We validate hypotheses before writing a single line of code.">Identificamos un problema real con mercado potencial. Validamos hipótesis antes de escribir una sola línea de código.</div>
+            </div>
+            <div class="step reveal">
+                <div class="step-num">02</div>
+                <div class="step-icon"><i class="fas fa-robot"></i></div>
+                <div class="step-title" data-es="Build con IA" data-en="Build with AI">Build con IA</div>
+                <div class="step-text" data-es="Construimos el MVP en 4-8 semanas usando IA como acelerador. Stack moderno, arquitectura escalable, listo para producción." data-en="We build the MVP in 4-8 weeks using AI as the accelerator. Modern stack, scalable architecture, production-ready.">Construimos el MVP en 4-8 semanas usando IA como acelerador. Stack moderno, arquitectura escalable, listo para producción.</div>
+            </div>
+            <div class="step reveal">
+                <div class="step-num">03</div>
+                <div class="step-icon"><i class="fas fa-rocket"></i></div>
+                <div class="step-title" data-es="Launch & Traction" data-en="Launch & Traction">Launch & Traction</div>
+                <div class="step-text" data-es="Lanzamos públicamente y medimos tracción real: usuarios, MRR, retención. Los números guían las decisiones siguientes." data-en="We launch publicly and measure real traction: users, MRR, retention. Numbers guide the next decisions.">Lanzamos públicamente y medimos tracción real: usuarios, MRR, retención. Los números guían las decisiones siguientes.</div>
+            </div>
+            <div class="step reveal">
+                <div class="step-num">04</div>
+                <div class="step-icon"><i class="fas fa-users"></i></div>
+                <div class="step-title" data-es="Scale: Equipo + Capital" data-en="Scale: Team + Capital">Scale: Equipo + Capital</div>
+                <div class="step-text" data-es="Con tracción demostrada, abrimos la ronda pre-seed y sumamos co-founders. Equity justo, contratos estándar, transparencia total." data-en="With demonstrated traction, we open the pre-seed round and add co-founders. Fair equity, standard contracts, full transparency.">Con tracción demostrada, abrimos la ronda pre-seed y sumamos co-founders. Equity justo, contratos estándar, transparencia total.</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- METRICS -->
+<section class="section" style="background:var(--bg);">
+    <div class="section-inner">
+        <div class="section-header reveal">
+            <span class="section-label" data-es="Tracción" data-en="Traction">Tracción</span>
+            <h2 class="section-title" data-es="Impacto medible" data-en="Measurable impact">Impacto medible</h2>
+        </div>
+        <div class="metrics-grid">
+            <div class="metric-card reveal"><div class="metric-num" data-count="4">0</div><div class="metric-label" data-es="Proyectos lanzados" data-en="Projects launched">Proyectos lanzados</div></div>
+            <div class="metric-card reveal"><div class="metric-num" data-count="8">0</div><div class="metric-label" data-es="Semanas promedio al MVP" data-en="Average weeks to MVP">Semanas promedio al MVP</div></div>
+            <div class="metric-card reveal"><div class="metric-num" data-count="100">0</div><div class="metric-label" data-es="% AI-native workflow" data-en="% AI-native workflow">% AI-native workflow</div></div>
+            <div class="metric-card reveal"><div class="metric-num" style="font-size:1.75rem;" data-es="Pre-Seed" data-en="Pre-Seed">Pre-Seed</div><div class="metric-label" data-es="Etapa actual" data-en="Current stage">Etapa actual</div></div>
+        </div>
+    </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- PROYECTOS -->
+<section class="section" id="proyectos" style="background:var(--bg2);">
+    <div class="section-inner">
+        <div class="section-header reveal">
+            <span class="section-label" data-es="Portfolio" data-en="Portfolio">Portfolio</span>
+            <h2 class="section-title" data-es="Proyectos en construcción" data-en="Projects in development">Proyectos en construcción</h2>
+            <p class="section-sub" data-es="Cada proyecto muestra qué necesita: capital, equipo o ambos. Deal flow abierto para inversores y co-founders." data-en="Each project shows what it needs: capital, team, or both. Open deal flow for investors and co-founders.">Cada proyecto muestra qué necesita: capital, equipo o ambos. Deal flow abierto para inversores y co-founders.</p>
+        </div>
+
+        <!-- SUMMARY TABLE -->
+        <div class="table-wrap reveal" style="margin-bottom:2.5rem;">
+            <table class="summary-table">
+                <thead>
+                    <tr>
+                        <th data-es="Proyecto" data-en="Project">Proyecto</th>
+                        <th data-es="Estado" data-en="Stage">Estado</th>
+                        <th data-es="Necesita" data-en="Needs">Necesita</th>
+                        <th data-es="Monto / Rol" data-en="Amount / Role">Monto / Rol</th>
+                        <th data-es="Tracción" data-en="Traction">Tracción</th>
+                    </tr>
+                </thead>
+                <tbody id="summaryTableBody">
+                    <tr><td colspan="5" style="text-align:center;color:var(--text2);padding:2rem;">Cargando...</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div id="proyectosGrid" class="projects-grid"></div>
+    </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- SUMATE -->
+<section class="section" id="sumate" style="background:var(--bg);">
+    <div class="section-inner">
+        <div class="section-header reveal">
+            <span class="section-label" data-es="Oportunidades" data-en="Opportunities">Oportunidades</span>
+            <h2 class="section-title" data-es="Invertí o unite al equipo" data-en="Invest or join the team">Invertí o unite al equipo</h2>
+            <p class="section-sub" data-es="Si sos inversor ángel, VC early-stage o un co-founder técnico buscando un proyecto con tracción, completá el formulario y te contactamos en 48hs." data-en="If you are an angel investor, early-stage VC, or a technical co-founder looking for a project with traction, complete the form and we'll contact you within 48 hours.">Si sos inversor ángel, VC early-stage o un co-founder técnico buscando un proyecto con tracción, completá el formulario y te contactamos en 48hs.</p>
+        </div>
+        <div style="background:var(--bg2);border:1px solid var(--border);border-radius:2rem;padding:2rem;" class="reveal">
+            <div class="form-grid" id="postForm">
+                <div class="form-field">
+                    <label data-es="Nombre completo" data-en="Full name">Nombre completo</label>
+                    <input type="text" id="postNombre" placeholder="Juan García / John Smith">
+                </div>
+                <div class="form-field">
+                    <label data-es="Email" data-en="Email">Email</label>
+                    <input type="email" id="postEmail" placeholder="juan@ejemplo.com">
+                </div>
+                <div class="form-field">
+                    <label data-es="Perfil" data-en="Profile">Perfil</label>
+                    <select id="postPerfil">
+                        <option value="" data-es="Seleccioná tu perfil" data-en="Select your profile">Seleccioná tu perfil</option>
+                        <option value="angel" data-es="Inversor Ángel" data-en="Angel Investor">Inversor Ángel</option>
+                        <option value="vc" data-es="Venture Capital" data-en="Venture Capital">Venture Capital</option>
+                        <option value="cofounder-tech" data-es="Co-founder Técnico (CTO/Lead Dev)" data-en="Technical Co-founder (CTO/Lead Dev)">Co-founder Técnico (CTO/Lead Dev)</option>
+                        <option value="cofounder-biz" data-es="Co-founder Comercial (CMO/Sales)" data-en="Business Co-founder (CMO/Sales)">Co-founder Comercial (CMO/Sales)</option>
+                        <option value="dev" data-es="Desarrollador" data-en="Developer">Desarrollador</option>
+                        <option value="designer" data-es="Designer" data-en="Designer">Designer</option>
+                        <option value="otro" data-es="Otro" data-en="Other">Otro</option>
+                    </select>
+                </div>
+                <div class="form-field">
+                    <label data-es="Proyecto de interés" data-en="Project of interest">Proyecto de interés</label>
+                    <select id="postProyecto">
+                        <option value="cualquiera" data-es="Cualquier proyecto" data-en="Any project">Cualquier proyecto</option>
+                    </select>
+                </div>
+                <div class="form-field" style="grid-column:1/-1;">
+                    <label data-es="Portfolio / LinkedIn / Web" data-en="Portfolio / LinkedIn / Web">Portfolio / LinkedIn / Web</label>
+                    <input type="url" id="postPortfolio" placeholder="https://...">
+                </div>
+                <div class="form-field" style="grid-column:1/-1;">
+                    <label data-es="¿Qué aportás y qué buscás?" data-en="What do you bring and what are you looking for?">¿Qué aportás y qué buscás?</label>
+                    <textarea id="postMensaje" placeholder="Contanos brevemente tu experiencia y expectativas..."></textarea>
+                </div>
+            </div>
+            <div style="margin-top:1.25rem;">
+                <button onclick="enviarPostulacion()" class="btn-primary" style="padding:.8rem 2rem;border-radius:100px;font-size:.875rem;font-weight:700;border:none;cursor:pointer;" data-es="Enviar postulación" data-en="Submit application">Enviar postulación</button>
+            </div>
+        </div>
+    </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- CONTACTO -->
+<section class="section" id="contacto" style="background:var(--bg2);">
+    <div class="section-inner" style="text-align:center;">
+        <div class="reveal" style="max-width:600px;margin:0 auto;">
+            <span class="section-label" data-es="Contacto directo" data-en="Direct contact">Contacto directo</span>
+            <h2 class="section-title" data-es="¿Hablamos?" data-en="Let's talk?">¿Hablamos?</h2>
+            <p class="section-sub" style="margin-bottom:1.75rem;" data-es="Para consultas sobre inversión, deal flow o alianzas estratégicas." data-en="For inquiries about investment, deal flow, or strategic partnerships.">Para consultas sobre inversión, deal flow o alianzas estratégicas.</p>
+            <div style="display:flex;flex-wrap:wrap;gap:.75rem;justify-content:center;">
+                <a href="mailto:leopoldosolis86@yahoo.com" class="btn-primary" style="padding:.8rem 1.5rem;border-radius:100px;font-size:.875rem;font-weight:700;"><i class="fas fa-envelope"></i> Email</a>
+                <a href="https://ar.linkedin.com/in/jorge-leopoldo-solis-6a04a036a" target="_blank" class="btn-secondary" style="padding:.8rem 1.5rem;border-radius:100px;font-size:.875rem;font-weight:700;"><i class="fab fa-linkedin"></i> LinkedIn</a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<footer style="border-top:1px solid var(--border);padding:1.75rem;text-align:center;font-size:.75rem;color:var(--text2);background:var(--bg);">
+    <span data-es="© 2026 BUILDER VENTURE STUDIO · AI-Native Venture Builder · Pre-Seed Stage" data-en="© 2026 BUILDER VENTURE STUDIO · AI-Native Venture Builder · Pre-Seed Stage">© 2026 BUILDER VENTURE STUDIO · AI-Native Venture Builder · Pre-Seed Stage</span>
+</footer>
+
+<!-- MODAL -->
+<div id="modal" class="modal">
+    <div class="modal-box">
+        <div class="modal-header">
+            <span id="modalTitulo" style="font-weight:700;font-size:.9rem;color:var(--text);"></span>
+            <button onclick="cerrarModal()" style="background:none;border:none;cursor:pointer;color:#9ca3af;font-size:1.25rem;"><i class="fas fa-times"></i></button>
+        </div>
+        <iframe id="iframeProyecto" title="Vista previa"></iframe>
+    </div>
+</div>
+
+<script>
+const SUPABASE_URL='https://hniumqxaqfjvumimwtyp.supabase.co';
+const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhuaXVtcXhhcWZqdnVtaW13dHlwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAwMTc2MjAsImV4cCI6MjA5NTU5MzYyMH0.JC7Hscdy7lpiMIaDD02vteh5aw9GDdEPCzmzBvUMs9Q';
+let proyectos=[];
+let lang='es';
+
+// DARK MODE
+function toggleDark(){
+    document.body.classList.toggle('dark');
+    const d=document.body.classList.contains('dark');
+    document.getElementById('darkBtn').innerHTML=d?'<i class="fas fa-sun"></i>':'<i class="fas fa-moon"></i>';
+    localStorage.setItem('dark',d);
+}
+if(localStorage.getItem('dark')==='true'){document.body.classList.add('dark');document.getElementById('darkBtn').innerHTML='<i class="fas fa-sun"></i>';}
+
+// LANGUAGE
+function setLang(l){
+    lang=l;
+    document.getElementById('btnEs').classList.toggle('active',l==='es');
+    document.getElementById('btnEn').classList.toggle('active',l==='en');
+    document.querySelectorAll('[data-es]').forEach(el=>{
+        const txt=el.getAttribute('data-'+l);
+        if(txt) el.innerHTML=txt;
+    });
+    // update select options
+    document.querySelectorAll('select option[data-es]').forEach(opt=>{
+        const txt=opt.getAttribute('data-'+l);
+        if(txt) opt.textContent=txt;
+    });
+    renderizarProyectos();
+    renderTabla();
+}
+
+// NAV
+function toggleMenu(){document.getElementById('navMenu').classList.toggle('open');}
+
+// LOAD PROJECTS
+async function cargarProyectos(){
+    try{
+        const res=await fetch(`${SUPABASE_URL}/rest/v1/proyectos?activo=eq.true&order=created_at.desc`,{
+            headers:{'apikey':SUPABASE_KEY,'Authorization':`Bearer ${SUPABASE_KEY}`}
+        });
+        proyectos=await res.json();
+        // populate project select
+        const sel=document.getElementById('postProyecto');
+        proyectos.forEach(p=>{
+            const opt=document.createElement('option');
+            opt.value=p.id;
+            opt.textContent=p.nombre;
+            sel.appendChild(opt);
+        });
+        renderizarProyectos();
+        renderTabla();
+    }catch(e){
+        console.error('Error:',e);
+        document.getElementById('proyectosGrid').innerHTML=`<p style="color:var(--text2);grid-column:1/-1;text-align:center;padding:3rem 0;">Error al cargar proyectos.</p>`;
+    }
+}
+
+function getNecesidadBadge(tipo){
+    if(!tipo) return '';
+    const map={
+        'inversion':{es:'Busca Inversión',en:'Seeking Investment',cls:'badge-inv'},
+        'equipo':{es:'Busca Equipo',en:'Seeking Team',cls:'badge-team'},
+        'ambos':{es:'Inversión + Equipo',en:'Investment + Team',cls:'badge-both'}
+    };
+    const d=map[tipo]||{es:tipo,en:tipo,cls:'badge-stage'};
+    return `<span class="badge ${d.cls}" data-es="${d.es}" data-en="${d.en}">${d[lang]}</span>`;
+}
+
+function renderizarProyectos(){
+    const grid=document.getElementById('proyectosGrid');
+    if(!proyectos||!proyectos.length){
+        grid.innerHTML=`<p style="color:var(--text2);grid-column:1/-1;text-align:center;padding:3rem 0;">${lang==='es'?'No hay proyectos activos aún.':'No active projects yet.'}</p>`;
+        return;
+    }
+    grid.innerHTML=proyectos.map(p=>{
+        const nombre=lang==='en'&&p.nombre_en?p.nombre_en:p.nombre;
+        const desc=lang==='en'&&p.descripcion_en?p.descripcion_en:(p.descripcion||'');
+        const estado=lang==='en'&&p.estado_en?p.estado_en:p.estado;
+        const showInv=p.tipo_necesidad==='inversion'||p.tipo_necesidad==='ambos';
+        const showTeam=p.tipo_necesidad==='equipo'||p.tipo_necesidad==='ambos';
+        const monto=p.monto_busqueda?`<span style="font-weight:600;color:var(--accent);">${p.monto_busqueda}</span>`:'';
+        const rol=p.rol_buscado?`<span>${p.rol_buscado}</span>`:'';
+        const traction=p.traccion?`<div class="card-traction"><i class="fas fa-chart-line"></i>${escHtml(p.traccion)}</div>`:'';
+        return `
+        <div class="project-card reveal" onclick="verProyecto(${p.id})">
+            <div class="preview-wrap">
+                ${p.logo_data?`<img src="${p.logo_data}" alt="${escHtml(nombre)}">`:`<div class="no-preview">${lang==='es'?'Sin vista previa':'No preview'}</div>`}
+                <div class="play-btn"><i class="fas fa-play"></i></div>
+            </div>
+            <div class="card-body">
+                <div class="card-badges">
+                    <span class="badge badge-stage">${escHtml(estado)}</span>
+                    ${getNecesidadBadge(p.tipo_necesidad)}
+                </div>
+                <div class="card-title">${escHtml(nombre)}</div>
+                <div class="card-desc">${escHtml(desc)}</div>
+                ${traction}
+                ${monto||rol?`<div style="font-size:.78rem;color:var(--text2);margin-bottom:.85rem;display:flex;gap:.5rem;flex-wrap:wrap;">${monto}${monto&&rol?'·':''}${rol}</div>`:''}
+                <div class="card-actions" onclick="event.stopPropagation()">
+                    ${showInv?`<a href="#sumate" class="card-btn card-btn-inv" data-es="Invertir" data-en="Invest">${lang==='es'?'Invertir':'Invest'}</a>`:''}
+                    ${showTeam?`<a href="#sumate" class="card-btn card-btn-team" data-es="Unirme al equipo" data-en="Join the team">${lang==='es'?'Unirme al equipo':'Join the team'}</a>`:''}
+                    <a href="mailto:leopoldosolis86@yahoo.com" style="color:var(--text2);font-size:.8rem;display:inline-flex;align-items:center;gap:.3rem;text-decoration:none;" onclick="event.stopPropagation()"><i class="fas fa-envelope"></i></a>
+                </div>
+            </div>
+        </div>`;
+    }).join('');
+    document.querySelectorAll('.reveal').forEach(el=>revealObs.observe(el));
+}
+
+function renderTabla(){
+    const tbody=document.getElementById('summaryTableBody');
+    if(!proyectos||!proyectos.length){
+        tbody.innerHTML=`<tr><td colspan="5" style="text-align:center;color:var(--text2);padding:2rem;">${lang==='es'?'Sin proyectos aún':'No projects yet'}</td></tr>`;
+        return;
+    }
+    tbody.innerHTML=proyectos.map(p=>{
+        const nombre=lang==='en'&&p.nombre_en?p.nombre_en:p.nombre;
+        const estado=lang==='en'&&p.estado_en?p.estado_en:p.estado;
+        return `<tr>
+            <td style="font-weight:600;">${escHtml(nombre)}</td>
+            <td><span class="badge badge-stage">${escHtml(estado)}</span></td>
+            <td>${getNecesidadBadge(p.tipo_necesidad)}</td>
+            <td style="font-size:.82rem;">${p.monto_busqueda?escHtml(p.monto_busqueda):'—'}${p.rol_buscado?' · '+escHtml(p.rol_buscado):''}</td>
+            <td style="font-size:.82rem;color:var(--text2);">${p.traccion?escHtml(p.traccion):'—'}</td>
+        </tr>`;
+    }).join('');
+}
+
+function verProyecto(id){
+    const p=proyectos.find(x=>x.id==id);
+    if(p&&p.html_content){
+        document.getElementById('modalTitulo').innerText=(lang==='en'&&p.nombre_en)?p.nombre_en:p.nombre;
+        const blob=new Blob([p.html_content],{type:'text/html'});
+        document.getElementById('iframeProyecto').src=URL.createObjectURL(blob);
+        document.getElementById('modal').classList.add('active');
+    }
+}
+function cerrarModal(){document.getElementById('modal').classList.remove('active');document.getElementById('iframeProyecto').src='';}
+document.getElementById('modal').addEventListener('click',e=>{if(e.target===document.getElementById('modal'))cerrarModal();});
+
+async function enviarPostulacion(){
+    const nombre=document.getElementById('postNombre').value.trim();
+    const email=document.getElementById('postEmail').value.trim();
+    const perfil=document.getElementById('postPerfil').value;
+    const proyecto=document.getElementById('postProyecto').value;
+    const portfolio=document.getElementById('postPortfolio').value.trim();
+    const mensaje=document.getElementById('postMensaje').value.trim();
+    if(!nombre||!email||!perfil){mostrarToast(lang==='es'?'Completá los campos obligatorios':'Please fill in required fields');return;}
+    try{
+        const res=await fetch(`${SUPABASE_URL}/rest/v1/postulaciones`,{
+            method:'POST',
+            headers:{'apikey':SUPABASE_KEY,'Authorization':`Bearer ${SUPABASE_KEY}`,'Content-Type':'application/json','Prefer':'return=minimal'},
+            body:JSON.stringify({nombre,email,perfil,proyecto_id:proyecto==='cualquiera'?null:proyecto,portfolio,mensaje,estado:'pendiente'})
+        });
+        if(res.ok||res.status===201){
+            mostrarToast(lang==='es'?'¡Postulación enviada! Te contactamos pronto.':'Application sent! We\'ll contact you soon.');
+            document.getElementById('postNombre').value='';
+            document.getElementById('postEmail').value='';
+            document.getElementById('postPerfil').value='';
+            document.getElementById('postPortfolio').value='';
+            document.getElementById('postMensaje').value='';
+        } else { mostrarToast(lang==='es'?'Error al enviar. Intentá por email.':'Error sending. Try via email.'); }
+    }catch(e){ mostrarToast(lang==='es'?'Error de conexión.':'Connection error.'); }
+}
+
+function mostrarToast(msg){
+    const t=document.createElement('div');
+    t.className='toast';t.textContent=msg;
+    document.body.appendChild(t);
+    setTimeout(()=>t.remove(),4000);
+}
+function escHtml(s){if(!s)return'';return s.replace(/[&<>]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[m]));}
+
+// COUNTERS
+document.querySelectorAll('[data-count]').forEach(el=>{
+    const target=+el.getAttribute('data-count');
+    const obs=new IntersectionObserver(entries=>{
+        if(entries[0].isIntersecting){let n=0;const t=setInterval(()=>{el.innerText=++n;if(n>=target)clearInterval(t);},25);obs.unobserve(el);}
+    },{threshold:.5});
+    obs.observe(el);
+});
+
+// REVEAL
+const revealObs=new IntersectionObserver(entries=>{
+    entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('visible');revealObs.unobserve(e.target);}});
+},{threshold:.08});
+document.querySelectorAll('.reveal').forEach(el=>revealObs.observe(el));
+
+window.addEventListener('load',cargarProyectos);
+</script>
+</body>
+</html>
